@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Smart Mobility Le Mans — SETRAM network status</title>
+<!-- Chart.js fournit le graphique a barres a partir des donnees JSON. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+  .kpis { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+  .kpi { flex: 1; min-width: 180px; padding: 0.8rem 1rem; border: 1px solid #ccc; border-radius: 8px; }
+  .kpi .value { font-size: 1.6rem; font-weight: bold; color: #0d7c9e; }
+  .kpi .label { font-size: 0.8rem; color: #666; }
+  #alerts { padding: 0.8rem 1rem; border: 2px solid #c46e0a; border-radius: 8px; background: #faf3e8; }
+  #alerts.none { border-color: #2c9c4a; background: #f0f8f2; }
+  canvas { margin-top: 2rem; }
+  #updated { color: #666; font-size: 0.85rem; }
+  #supply { margin-top: 3rem; border-top: 1px solid #ccc; padding-top: 1rem; }
+  .supply-chart { position: relative; height: 760px; }
+  .supply-chart canvas { margin-top: 0; }
+  .table-scroll { overflow-x: auto; }
+  #supply table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  #supply th, #supply td { padding: 0.6rem; border-bottom: 1px solid #ddd; text-align: right; }
+  #supply th[scope="row"] { text-align: left; font-weight: normal; }
+  #supply caption { text-align: left; margin-bottom: 0.5rem; }
+  #supply-status.error { color: #9c251b; }
+</style>
+</head>
+<body>
+  <h1>SETRAM network — current status</h1>
+  <p>Real-time delay and disruption snapshot for Le Mans Métropole's bus and tram network.</p>
+  <!-- Les trois indicateurs sont renseignes apres le chargement des donnees. -->
+  <div class="kpis" id="kpis">Loading...</div>
+  <div id="alerts">Loading alerts...</div>
+  <canvas id="delayChart" height="320"></canvas>
+  <p id="updated"></p>
+
+  <section id="supply" lang="fr" aria-labelledby="supply-title">
+    <h2 id="supply-title">Offre de transport et population des 20 communes</h2>
+    <p>Indicateur : passages programmés aux arrêts pour le jour représentatif,
+      divisés par la population, puis multipliés par 1 000.</p>
+    <p>La population est un <strong>indicateur indirect de la demande</strong>, pas une
+      mesure de fréquentation. Ce ratio <strong>ne mesure pas l’accessibilité réelle</strong> :
+      il ignore notamment la distance aux arrêts, les horaires utiles et la capacité des véhicules.
+      Les arrêts sont attribués au centre communal le plus proche, sans suivre les limites
+      administratives. Un même trajet peut contribuer à plusieurs passages.</p>
+    <p id="supply-status" role="status">Chargement du classement…</p>
+    <div id="supply-results" hidden>
+      <div class="supply-chart" id="supply-chart-container">
+        <canvas id="supplyChart" role="img" aria-label="Classement décroissant des passages programmés pour 1 000 habitants. Les valeurs sont disponibles dans le tableau ci-dessous."></canvas>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Classement complet — offre programmée pour le mardi représentatif</caption>
+          <thead><tr><th scope="col">Rang</th><th scope="col">Commune</th>
+            <th scope="col">Passages programmés</th><th scope="col">Population</th>
+            <th scope="col">Passages pour 1 000 habitants</th></tr></thead>
+          <tbody id="supply-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+<script>
+// Chemin relatif a docs/index.html : charge docs/data/current_state.json.
+fetch('data/current_state.json')
+  .then(r => r.json())
+  .then(data => {
+    const routes = data.routes || [];
+
+    // Affiche les indicateurs deja calcules par le collecteur Python.
+    document.getElementById('kpis').innerHTML = `
+      <div class="kpi"><div class="value">${data.network_avg_delay_s.toFixed(1)}s</div><div class="label">Network average delay</div></div>
+      <div class="kpi"><div class="value">${data.n_routes_reporting}</div><div class="label">Routes reporting</div></div>
+      <div class="kpi"><div class="value">${data.alerts.length}</div><div class="label">Active alerts</div></div>
+    `;
+
+    document.getElementById('updated').textContent = `Data last updated ${data.generated_at}`;
+
+    // Affiche les alertes disponibles, ou confirme leur absence.
+    const alertsEl = document.getElementById('alerts');
+    if (!data.alerts || data.alerts.length === 0) {
+      alertsEl.classList.add('none');
+      alertsEl.innerHTML = '<strong>No active alerts.</strong>';
+    } else {
+      alertsEl.innerHTML = '<strong>Active alerts:</strong><ul>' +
+        data.alerts.map(a => `<li>[Route ${a.routes || '?'}] ${a.header}</li>`).join('') +
+        '</ul>';
+    }
+
+    // Sans lignes observees, remplace le graphique par un message explicatif.
+    if (routes.length === 0) {
+      document.getElementById('delayChart').outerHTML =
+        '<p>No route data yet -- trigger the collect_snapshot workflow from the Actions tab.</p>';
+      return;
+    }
+
+    // Convertit un score borne entre 0 et 1 en teinte rouge a verte.
+    function scoreToColor(t) {
+      const clamped = Math.max(0, Math.min(1, t));
+      const hue = 120 * clamped; // 0 = red (worst), 120 = green (best)
+      return `hsl(${hue.toFixed(0)}, 70%, 45%)`;
+    }
+    // Normalise les retards entre les valeurs extremes du snapshot, puis inverse si demande.
+    function normalizeForColor(values, invert) {
+      const lo = Math.min(...values);
+      const hi = Math.max(...values);
+      if (hi === lo) return values.map(() => 0.5);
+      const scaled = values.map(v => (v - lo) / (hi - lo));
+      return invert ? scaled.map(s => 1 - s) : scaled;
+    }
+    // lower delay = greener, higher delay = redder
+    const colorNorm = normalizeForColor(routes.map(r => r.avg_delay_s), true);
+    const barColors = colorNorm.map(t => scoreToColor(t));
+
+    // Chaque barre represente le retard moyen en secondes pour une ligne.
+    new Chart(document.getElementById('delayChart'), {
+      type: 'bar',
+      data: {
+        labels: routes.map(r => r.route_name),
+        datasets: [{
+          label: 'Average delay (s)',
+          data: routes.map(r => r.avg_delay_s),
+          backgroundColor: barColors
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Average delay by route, this snapshot (green = on time/early, red = most delayed)' },
+          // Les infobulles ajoutent le nombre de trajets observes et les arrets sautes.
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                const r = routes[items[0].dataIndex];
+                return `Route ${r.route_name}`;
+              },
+              label: (item) => {
+                const r = routes[item.dataIndex];
+                return [`Avg delay: ${r.avg_delay_s}s`, `Trips observed: ${r.n_trips_observed}`, `Skipped stops: ${r.n_skipped}`];
+              }
+            }
+          }
+        },
+        scales: { y: { title: { display: true, text: 'Average delay (seconds)' } } }
+      }
+    });
+  })
+  // Signale une erreur de chargement ou de traitement des donnees.
+  .catch(err => {
+    document.getElementById('kpis').innerHTML =
+      '<p>Could not load network status (' + err + '). Check that ' +
+      '<code>docs/data/current_state.json</code> exists in the repo.</p>';
+  });
+</script>
+<script>
+// Chargement indépendant : une erreur de cette section ne touche pas les KPI temps réel.
+(async function loadSupply() {
+  const status = document.getElementById('supply-status');
+  const results = document.getElementById('supply-results');
+  const integer = new Intl.NumberFormat('fr-FR');
+  const decimal = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  try {
+    const response = await fetch('data/supply_by_commune.json');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const communes = data.communes;
+    // Refuse un classement incomplet ou des valeurs inutilisables plutôt que de les masquer.
+    if (!Array.isArray(communes) || communes.length !== 20 ||
+        communes.some(c => !c || typeof c.commune !== 'string' || !c.commune.trim() ||
+          !Number.isFinite(c.population) || c.population <= 0 ||
+          !Number.isFinite(c.total_daily_stop_visits) || c.total_daily_stop_visits < 0 ||
+          !Number.isFinite(c.stop_visits_per_1000_residents) || c.stop_visits_per_1000_residents < 0) ||
+        new Set(communes.map(c => c.commune)).size !== 20) {
+      throw new Error('Le fichier doit contenir 20 communes distinctes avec des valeurs valides.');
+    }
+    const sorted = [...communes].sort((a, b) =>
+      b.stop_visits_per_1000_residents - a.stop_visits_per_1000_residents ||
+      a.commune.localeCompare(b.commune, 'fr'));
+    const rows = document.getElementById('supply-rows');
+    let rank = 1;
+    sorted.forEach((c, index) => {
+      if (index === 0 || c.stop_visits_per_1000_residents !== sorted[index - 1].stop_visits_per_1000_residents) rank = index + 1;
+      const row = document.createElement('tr');
+      // textContent conserve les noms comme du texte, sans interpréter de HTML.
+      [integer.format(rank), c.commune, integer.format(c.total_daily_stop_visits),
+        integer.format(c.population), decimal.format(c.stop_visits_per_1000_residents)]
+        .forEach((value, column) => {
+          const cell = document.createElement(column === 1 ? 'th' : 'td');
+          if (column === 1) cell.scope = 'row';
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
+      rows.appendChild(row);
+    });
+    results.hidden = false;
+    // Une couleur uniforme ne présente pas le ratio comme une note de qualité de service.
+    try {
+      new Chart(document.getElementById('supplyChart'), {
+        type: 'bar',
+        data: {
+          labels: sorted.map(c => c.commune),
+          datasets: [{ label: 'Passages pour 1 000 habitants',
+            data: sorted.map(c => c.stop_visits_per_1000_residents), backgroundColor: '#0d7c9e' }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: item => {
+              const c = sorted[item.dataIndex];
+              return [`Ratio : ${decimal.format(c.stop_visits_per_1000_residents)} pour 1 000 habitants`,
+                `Passages : ${integer.format(c.total_daily_stop_visits)}`,
+                `Population : ${integer.format(c.population)}`];
+            } } }
+          },
+          scales: {
+            x: { beginAtZero: true, title: { display: true, text: 'Passages programmés pour 1 000 habitants' } },
+            y: { ticks: { autoSkip: false } }
+          }
+        }
+      });
+      status.textContent = '20 communes affichées, du ratio le plus élevé au plus faible. Valeurs arrondies à deux décimales dans le tableau.';
+    } catch (error) {
+      document.getElementById('supply-chart-container').hidden = true;
+      status.classList.add('error');
+      status.textContent = 'Le graphique est indisponible. Le classement complet reste consultable dans le tableau.';
+    }
+  } catch (error) {
+    results.hidden = true;
+    status.classList.add('error');
+    status.textContent = `Impossible de charger le classement (${error.message}). Vérifiez le fichier data/supply_by_commune.json et rechargez la page.`;
+  }
+})();
+</script>
+</body>
+</html>

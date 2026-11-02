@@ -1,0 +1,216 @@
+{
+  "metric": "Scheduled stop-visits per representative weekday per 1,000 residents",
+  "formula": "total_daily_stop_visits / population * 1000",
+  "sources": [
+    "data/gtfs_static/stops_frequency.csv",
+    "data/reference/communes.csv"
+  ],
+  "limitations": [
+    "Population is a proxy for demand, not observed ridership.",
+    "Stops are assigned to the nearest commune centre, not administrative boundaries.",
+    "Supply reflects only the representative Tuesday service selected upstream.",
+    "Stop-visits do not measure capacity, spatial accessibility or unique trips."
+  ],
+  "communes": [
+    {
+      "rank": 1,
+      "commune": "La-Chapelle-Saint-Aubin",
+      "lat": 48.035132,
+      "lon": 0.156778,
+      "population": 2319,
+      "n_assigned_stops": 53,
+      "total_daily_stop_visits": 2343,
+      "stop_visits_per_1000_residents": 1010.3492884864165
+    },
+    {
+      "rank": 2,
+      "commune": "Coulaines",
+      "lat": 48.030875,
+      "lon": 0.208443,
+      "population": 8226,
+      "n_assigned_stops": 105,
+      "total_daily_stop_visits": 6267,
+      "stop_visits_per_1000_residents": 761.852662290299
+    },
+    {
+      "rank": 3,
+      "commune": "Rouillon",
+      "lat": 47.995585,
+      "lon": 0.141409,
+      "population": 2666,
+      "n_assigned_stops": 41,
+      "total_daily_stop_visits": 1906,
+      "stop_visits_per_1000_residents": 714.9287321830458
+    },
+    {
+      "rank": 4,
+      "commune": "Allonnes",
+      "lat": 47.960493,
+      "lon": 0.150194,
+      "population": 10846,
+      "n_assigned_stops": 69,
+      "total_daily_stop_visits": 4017,
+      "stop_visits_per_1000_residents": 370.3669555596533
+    },
+    {
+      "rank": 5,
+      "commune": "Arnage",
+      "lat": 47.930086,
+      "lon": 0.195402,
+      "population": 5548,
+      "n_assigned_stops": 34,
+      "total_daily_stop_visits": 1638,
+      "stop_visits_per_1000_residents": 295.2415284787311
+    },
+    {
+      "rank": 6,
+      "commune": "Yvre-l-Eveque",
+      "lat": 48.026286,
+      "lon": 0.271411,
+      "population": 4269,
+      "n_assigned_stops": 22,
+      "total_daily_stop_visits": 750,
+      "stop_visits_per_1000_residents": 175.68517217146874
+    },
+    {
+      "rank": 7,
+      "commune": "Saint-Saturnin",
+      "lat": 48.054627,
+      "lon": 0.164448,
+      "population": 2864,
+      "n_assigned_stops": 21,
+      "total_daily_stop_visits": 490,
+      "stop_visits_per_1000_residents": 171.08938547486034
+    },
+    {
+      "rank": 8,
+      "commune": "La-Milesse",
+      "lat": 48.06312,
+      "lon": 0.132381,
+      "population": 2650,
+      "n_assigned_stops": 15,
+      "total_daily_stop_visits": 425,
+      "stop_visits_per_1000_residents": 160.37735849056602
+    },
+    {
+      "rank": 9,
+      "commune": "Sarge-les-le-Mans",
+      "lat": 48.040678,
+      "lon": 0.249355,
+      "population": 3941,
+      "n_assigned_stops": 15,
+      "total_daily_stop_visits": 630,
+      "stop_visits_per_1000_residents": 159.85790408525756
+    },
+    {
+      "rank": 10,
+      "commune": "Le Mans",
+      "lat": 47.993335,
+      "lon": 0.191169,
+      "population": 148876,
+      "n_assigned_stops": 329,
+      "total_daily_stop_visits": 22900,
+      "stop_visits_per_1000_residents": 153.8192858486257
+    },
+    {
+      "rank": 11,
+      "commune": "Ruaudin",
+      "lat": 47.945001,
+      "lon": 0.261633,
+      "population": 3542,
+      "n_assigned_stops": 22,
+      "total_daily_stop_visits": 536,
+      "stop_visits_per_1000_residents": 151.3269339356296
+    },
+    {
+      "rank": 12,
+      "commune": "Champagne",
+      "lat": 48.014163,
+      "lon": 0.331368,
+      "population": 3728,
+      "n_assigned_stops": 19,
+      "total_daily_stop_visits": 425,
+      "stop_visits_per_1000_residents": 114.00214592274678
+    },
+    {
+      "rank": 13,
+      "commune": "Mulsanne",
+      "lat": 47.918943,
+      "lon": 0.248322,
+      "population": 5352,
+      "n_assigned_stops": 18,
+      "total_daily_stop_visits": 525,
+      "stop_visits_per_1000_residents": 98.09417040358746
+    },
+    {
+      "rank": 14,
+      "commune": "Aigne",
+      "lat": 48.066061,
+      "lon": 0.111904,
+      "population": 1724,
+      "n_assigned_stops": 6,
+      "total_daily_stop_visits": 138,
+      "stop_visits_per_1000_residents": 80.04640371229699
+    },
+    {
+      "rank": 15,
+      "commune": "Pruille-le-Chetif",
+      "lat": 47.990274,
+      "lon": 0.114073,
+      "population": 1357,
+      "n_assigned_stops": 8,
+      "total_daily_stop_visits": 88,
+      "stop_visits_per_1000_residents": 64.84893146647015
+    },
+    {
+      "rank": 16,
+      "commune": "Fay",
+      "lat": 48.008039,
+      "lon": 0.074566,
+      "population": 770,
+      "n_assigned_stops": 3,
+      "total_daily_stop_visits": 44,
+      "stop_visits_per_1000_residents": 57.14285714285714
+    },
+    {
+      "rank": 17,
+      "commune": "Trange",
+      "lat": 48.03046,
+      "lon": 0.111992,
+      "population": 1678,
+      "n_assigned_stops": 6,
+      "total_daily_stop_visits": 87,
+      "stop_visits_per_1000_residents": 51.847437425506556
+    },
+    {
+      "rank": 18,
+      "commune": "Chaufour-Notre-Dame",
+      "lat": 48.024716,
+      "lon": 0.079083,
+      "population": 1187,
+      "n_assigned_stops": 3,
+      "total_daily_stop_visits": 58,
+      "stop_visits_per_1000_residents": 48.86267902274642
+    },
+    {
+      "rank": 19,
+      "commune": "Saint-Georges-du-Bois",
+      "lat": 47.972349,
+      "lon": 0.102337,
+      "population": 2308,
+      "n_assigned_stops": 7,
+      "total_daily_stop_visits": 96,
+      "stop_visits_per_1000_residents": 41.5944540727903
+    },
+    {
+      "rank": 20,
+      "commune": "Fatines",
+      "lat": 48.047884,
+      "lon": 0.332902,
+      "population": 937,
+      "n_assigned_stops": 2,
+      "total_daily_stop_visits": 38,
+      "stop_visits_per_1000_residents": 40.554962646744926
+    }
+  ]
+}
