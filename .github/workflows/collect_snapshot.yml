@@ -1,0 +1,42 @@
+name: Collect realtime snapshot
+
+"on":
+  workflow_dispatch: {}
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+# Meme groupe que le referentiel statique, y compris pour les lancements manuels.
+concurrency:
+  group: mobility-data-main
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  collect:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas gtfs-realtime-bindings
+      - run: python scripts/collect_snapshot.py
+      - name: Commit updated snapshot data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Actualise la branche avant le commit sans ecraser les donnees locales.
+          git pull --ff-only origin main
+          git add data/history/ docs/data/current_state.json
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Update realtime snapshot [automated]"
+            git push origin HEAD:main
+          fi
