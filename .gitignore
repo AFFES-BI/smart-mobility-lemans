@@ -1,0 +1,62 @@
+# Environnements virtuels Python
+.venv/
+venv/
+env/
+
+# Bytecode et caches Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+.cache/
+
+# Rapports et fichiers de travail des outils Python
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.ipynb_checkpoints/
+
+# Fichiers temporaires et sauvegardes d'editeur
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+# Environnements virtuels Python
+.venv/
+venv/
+env/
+
+# Bytecode et caches Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+.cache/
+
+# Rapports et fichiers de travail des outils Python
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.ipynb_checkpoints/
+
+# Fichiers temporaires et sauvegardes d'editeur
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
