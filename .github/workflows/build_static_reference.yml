@@ -1,0 +1,88 @@
+name: Build static reference
+
+"on":
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 4 1 * *"
+
+permissions:
+  contents: write
+
+# Groupe commun aux deux producteurs : une seule ecriture a la fois.
+concurrency:
+  group: mobility-data-main
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas
+      - run: python scripts/build_static_reference.py
+      - run: python scripts/analyze_supply_demand.py
+      - name: Commit updated reference data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Integre les changements distants compatibles avant le commit.
+          # En cas de conflit avec les sorties locales, echoue sans ecraser main.
+          git pull --ff-only origin main
+          git add data/gtfs_static/stops_frequency.csv data/gtfs_static/routes.csv data/gtfs_static/supply_by_commune.csv docs/data/supply_by_commune.json
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Update static GTFS reference [automated]"
+            git push origin HEAD:main
+          fi
+name: Build static reference
+
+"on":
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 4 1 * *"
+
+permissions:
+  contents: write
+
+# Groupe commun aux deux producteurs : une seule ecriture a la fois.
+concurrency:
+  group: mobility-data-main
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas
+      - run: python scripts/build_static_reference.py
+      - run: python scripts/analyze_supply_demand.py
+      - name: Commit updated reference data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Integre les changements distants compatibles avant le commit.
+          # En cas de conflit avec les sorties locales, echoue sans ecraser main.
+          git pull --ff-only origin main
+          git add data/gtfs_static/stops_frequency.csv data/gtfs_static/routes.csv data/gtfs_static/supply_by_commune.csv docs/data/supply_by_commune.json
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Update static GTFS reference [automated]"
+            git push origin HEAD:main
+          fi
