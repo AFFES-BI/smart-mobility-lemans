@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-06T00:01:45Z",
-  "network_avg_delay_s": 486.0,
-  "n_routes_reporting": 3,
+  "generated_at": "2026-11-06T01:04:55Z",
+  "network_avg_delay_s": 1473.2,
+  "n_routes_reporting": 1,
   "routes": [
     {
       "route_id": "10A",
@@ -10,28 +10,8 @@
       "n_skipped": 29,
       "avg_delay_s": 1473.2,
       "max_delay_s": 1657,
-      "snapshot_ts": 1793923305,
+      "snapshot_ts": 1793927095,
       "route_name": "10A"
-    },
-    {
-      "route_id": "T1",
-      "n_trips_observed": 4,
-      "n_stop_updates": 192,
-      "n_skipped": 96,
-      "avg_delay_s": -3.2,
-      "max_delay_s": 91,
-      "snapshot_ts": 1793923305,
-      "route_name": "T1"
-    },
-    {
-      "route_id": "T2",
-      "n_trips_observed": 1,
-      "n_stop_updates": 36,
-      "n_skipped": 18,
-      "avg_delay_s": -12.1,
-      "max_delay_s": 25,
-      "snapshot_ts": 1793923305,
-      "route_name": "T2"
     }
   ],
   "alerts": []
