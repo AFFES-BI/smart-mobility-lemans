@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-11-06T01:04:55Z",
-  "network_avg_delay_s": 1473.2,
-  "n_routes_reporting": 1,
-  "routes": [
-    {
-      "route_id": "10A",
-      "n_trips_observed": 1,
-      "n_stop_updates": 39,
-      "n_skipped": 29,
-      "avg_delay_s": 1473.2,
-      "max_delay_s": 1657,
-      "snapshot_ts": 1793927095,
-      "route_name": "10A"
-    }
-  ],
+  "generated_at": "2026-11-06T02:26:07Z",
+  "network_avg_delay_s": 0.0,
+  "n_routes_reporting": 0,
+  "routes": [],
   "alerts": []
 }
