@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-11-14T00:56:06Z",
-  "network_avg_delay_s": 842.4,
-  "n_routes_reporting": 1,
-  "routes": [
-    {
-      "route_id": "7",
-      "n_trips_observed": 1,
-      "n_stop_updates": 24,
-      "n_skipped": 12,
-      "avg_delay_s": 842.4,
-      "max_delay_s": 917,
-      "snapshot_ts": 1794617766,
-      "route_name": "7"
-    }
-  ],
+  "generated_at": "2026-11-14T02:00:13Z",
+  "network_avg_delay_s": 0.0,
+  "n_routes_reporting": 0,
+  "routes": [],
   "alerts": []
 }
